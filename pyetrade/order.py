@@ -192,7 +192,7 @@ class ETradeOrder:
         if resp_format == "json":
             req = method(api_url, json=payload, timeout=self.timeout)
         else:
-            headers = {"Content-Type": "application/xml", "consumerKey": config["DEFAULT"]["CONSUMER_KEY"]}
+            headers = {"Content-Type": "application/xml", "consumerKey": consumer_key}
             payload = jxmlease.emit_xml(payload)
             LOGGER.debug("xml payload: %s", payload)
             req = method(api_url, data=payload, header_auth=True, headers=headers, timeout=self.timeout)
