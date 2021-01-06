@@ -170,7 +170,7 @@ class ETradeOrder:
 
         return payload
 
-    def perform_request(self, method, resp_format, api_url, payload):
+    def perform_request(self, method, resp_format, api_url, payload, consumer_key):
         """:description: POST or PUT request with json or xml used by preview, place and cancel
 
            :param method: PUT or POST method
@@ -192,10 +192,10 @@ class ETradeOrder:
         if resp_format == "json":
             req = method(api_url, json=payload, timeout=self.timeout)
         else:
-            headers = {"Content-Type": "application/xml"}
+            headers = {"Content-Type": "application/xml", "consumerKey": config["DEFAULT"]["CONSUMER_KEY"]}
             payload = jxmlease.emit_xml(payload)
             LOGGER.debug("xml payload: %s", payload)
-            req = method(api_url, data=payload, headers=headers, timeout=self.timeout)
+            req = method(api_url, data=payload, header_auth=True, headers=headers, timeout=self.timeout)
 
         LOGGER.debug(req.text)
         req.raise_for_status()
@@ -319,7 +319,7 @@ class ETradeOrder:
         # payload creation
         payload = self.build_order_payload("PreviewOrderRequest", **kwargs)
 
-        return self.perform_request(self.session.post, resp_format, api_url, payload)
+        return self.perform_request(self.session.post, resp_format, api_url, payload, kwargs['consumer_key'])
 
     def change_preview_equity_order(self, resp_format=None, **kwargs):
         """:description: Same as :class:`preview_equity_order` with orderId
@@ -344,7 +344,7 @@ class ETradeOrder:
         # payload creation
         payload = self.build_order_payload("PreviewOrderRequest", **kwargs)
 
-        return self.perform_request(self.session.put, resp_format, api_url, payload)
+        return self.perform_request(self.session.put, resp_format, api_url, payload, kwargs['consumer_key'])
 
     def place_equity_order(self, resp_format=None, **kwargs):
         """:description: Places Equity Order
@@ -384,7 +384,7 @@ class ETradeOrder:
         # payload creation
         payload = self.build_order_payload("PlaceOrderRequest", **kwargs)
 
-        return self.perform_request(self.session.post, resp_format, api_url, payload)
+        return self.perform_request(self.session.post, resp_format, api_url, payload, kwargs['consumer_key'])
 
     def place_changed_equity_order(self, resp_format=None, **kwargs):
         """:description: Places changes to equity orders
@@ -424,7 +424,7 @@ class ETradeOrder:
         # payload creation
         payload = self.build_order_payload("PlaceOrderRequest", **kwargs)
 
-        return self.perform_request(self.session.put, resp_format, api_url, payload)
+        return self.perform_request(self.session.put, resp_format, api_url, payload, kwargs['consumer_key'])
 
     def cancel_order(self, account_id, order_num, resp_format=None):
         """:description: Cancels a specific order for a given account
@@ -445,4 +445,4 @@ class ETradeOrder:
         api_url = self.base_url + "/" + account_id + "/orders/cancel"
         payload = {"CancelOrderRequest": {"orderId": order_num}}
 
-        return self.perform_request(self.session.put, resp_format, api_url, payload)
+        return self.perform_request(self.session.put, resp_format, api_url, payload, kwargs['consumer_key'])
