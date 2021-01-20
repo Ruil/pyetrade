@@ -38,6 +38,7 @@ class ETradeAlerts(object):
         client_secret,
         resource_owner_key,
         resource_owner_secret,
+        session,
         dev=True,
     ):
         self.client_key = client_key
@@ -46,13 +47,7 @@ class ETradeAlerts(object):
         self.resource_owner_secret = resource_owner_secret
         suffix = "apisb" if dev else "api"
         self.base_url = r"https://%s.etrade.com/v1/user/alerts" % suffix
-        self.session = OAuth1Session(
-            self.client_key,
-            self.client_secret,
-            self.resource_owner_key,
-            self.resource_owner_secret,
-            signature_type="AUTH_HEADER",
-        )
+        self.session = session
 
     def list_alerts(self, resp_format="xml") -> dict:
         """:description: Lists alerts in Etrade

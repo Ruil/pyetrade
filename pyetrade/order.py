@@ -12,7 +12,6 @@
 
 import logging
 import jxmlease
-from requests_oauthlib import OAuth1Session
 
 LOGGER = logging.getLogger(__name__)
 
@@ -57,6 +56,7 @@ class ETradeOrder:
         client_secret,
         resource_owner_key,
         resource_owner_secret,
+        session,
         dev=True,
         timeout=30,
     ):
@@ -67,13 +67,7 @@ class ETradeOrder:
         )
         self.dev_environment = dev
         self.timeout = timeout
-        self.session = OAuth1Session(
-            client_key,
-            client_secret,
-            resource_owner_key,
-            resource_owner_secret,
-            signature_type="AUTH_HEADER",
-        )
+        self.session = session
 
     def list_orders(self, account_id, resp_format="json", **kwargs):
         """:description: Lists orders for a specific account ID Key

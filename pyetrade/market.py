@@ -7,7 +7,6 @@
 
 import logging
 import xmltodict
-from requests_oauthlib import OAuth1Session
 
 LOGGER = logging.getLogger(__name__)
 
@@ -36,6 +35,7 @@ class ETradeMarket(object):
         client_secret,
         resource_owner_key,
         resource_owner_secret,
+        session,
         dev=True,
     ):
         self.client_key = client_key
@@ -45,13 +45,7 @@ class ETradeMarket(object):
         self.dev_environment = dev
         suffix = "apisb" if dev else "api"
         self.base_url = r"https://%s.etrade.com/v1/market/" % suffix
-        self.session = OAuth1Session(
-            self.client_key,
-            self.client_secret,
-            self.resource_owner_key,
-            self.resource_owner_secret,
-            signature_type="AUTH_HEADER",
-        )
+        self.session = session
 
     def __str__(self):
         ret = [

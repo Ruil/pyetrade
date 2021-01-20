@@ -8,7 +8,6 @@
 
 import logging
 import xmltodict
-from requests_oauthlib import OAuth1Session
 
 # Set up logging
 LOGGER = logging.getLogger(__name__)
@@ -38,6 +37,7 @@ class ETradeAccounts(object):
         client_secret,
         resource_owner_key,
         resource_owner_secret,
+        session,
         dev=True,
     ):
         """__init_()
@@ -50,13 +50,7 @@ class ETradeAccounts(object):
         self.base_url = r"https://%s.etrade.com/v1/accounts" % suffix
         # self.base_url_prod = r"https://api.etrade.com/v1/accounts"
         # self.base_url_dev = r"https://apisb.etrade.com/v1/accounts"
-        self.session = OAuth1Session(
-            self.client_key,
-            self.client_secret,
-            self.resource_owner_key,
-            self.resource_owner_secret,
-            signature_type="AUTH_HEADER",
-        )
+        self.session = session
 
     def list_accounts(self, resp_format="xml") -> dict:
         """:description: Lists accounts in Etrade
