@@ -169,6 +169,45 @@ class ETradeOrder:
             payload[order_type]["PreviewIds"] = {"previewId": kwargs["previewId"]}
 
         return payload
+    
+    
+    def build_order_payload(self, order_type, **kwargs):
+        """:description: Builds the POST payload of a preview or place order
+                         (Used internally)
+
+           :param order_type: PreviewOrderRequest or PlaceOrderRequest
+           :type  order_type: str, required
+           :return: Builds Order Payload
+           :rtype: ``xml`` or ``json`` based on ``resp_format``
+           :EtradeRef: https://apisb.etrade.com/docs/api/order/api-order-v1.html
+
+        """
+        instrument = {
+            "Product": {"securityType": "EQ", "symbol": kwargs["symbol"]},
+            "orderAction": kwargs["orderAction"],
+            "quantityType": "QUANTITY",
+            "quantity": kwargs["quantity"],
+        }
+        order = {}
+        order["allOrNone"] = 'false'
+        order["priceType"] = kwargs["price_type"]
+        order["orderTerm"] = kwargs["orderTerm"]
+        order["marketSession"] = kwargs["marketSession"]
+        order["stopPrice"] = ""        
+        order["limitPrice"] = kwargs["limitPrice"] if "limitPrice" in kwargs else None
+        order["Instrument"] = instrument
+        payload = {
+            order_type: {
+                "orderType": "EQ",
+                "clientOrderId": kwargs["clientOrderId"],
+                "Order": order,
+            }
+        }
+
+        if "previewId" in kwargs:
+            payload[order_type]["PreviewIds"] = {"previewId": kwargs["previewId"]}     
+
+        return payload    
 
     def perform_request(self, method, resp_format, api_url, payload, consumer_key):
         """:description: POST or PUT request with json or xml used by preview, place and cancel
