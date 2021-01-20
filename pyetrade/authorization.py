@@ -50,22 +50,22 @@ class ETradeOAuth(object):
         """
 
         # Set up session
-        etrade = OAuth1Service(
+        self.etrade = OAuth1Service(
             name="etrade",
-            self.client_key,
-            self.client_secret,
+            consumer_key=self.consumer_key,
+            consumer_secret=self.consumer_secret,
             request_token_url="https://api.etrade.com/oauth/request_token",
             access_token_url="https://api.etrade.com/oauth/access_token",
             authorize_url="https://us.etrade.com/e/t/etws/authorize?key={}&token={}",
             base_url="https://api.etrade.com")
         
         # Step 1: Get OAuth 1 request token and secret
-        self.request_token, self.request_token_secret = etrade.get_request_token(
+        self.request_token, self.request_token_secret = self.etrade.get_request_token(
             params={"oauth_callback": "oob", "format": "json"})
 
         # Step 2: Go through the authentication flow. Login to E*TRADE.
         # After you login, the page will provide a text code to enter.
-        authorize_url = etrade.authorize_url.format(etrade.consumer_key, request_token)
+        authorize_url = self.etrade.authorize_url.format(self.etrade.consumer_key, self.request_token)
         LOGGER.debug(authorize_url)
 
         return authorize_url
@@ -81,11 +81,11 @@ class ETradeOAuth(object):
 
         """
         # Step 3: Exchange the authorized request token for an authenticated OAuth 1 session
-        self.session = etrade.get_auth_session(request_token,
-                                      request_token_secret,
-                                      params={"oauth_verifier": text_code})
+        self.session = self.etrade.get_auth_session(self.request_token,
+                                      self.request_token_secret,
+                                      params={"oauth_verifier": verifier})
         # Get access token
-        self.access_token = {'oauth_token':self.request_token, 'oauth_token_secret':self.request_token_secret}
+        self.access_token = {'oauth_token':self.request_token, 'oauth_token_secret':self.request_token_secret, 'oauth_verifier': verifier}
         LOGGER.debug(self.access_token)
         return self.access_token
 
@@ -106,7 +106,7 @@ class ETradeAccessManager(object):
     """
 
     def __init__(
-        self, client_key, client_secret, resource_owner_key, resource_owner_secret
+        self, client_key, client_secret, resource_owner_key, resource_owner_secret, verifier
     ):
         self.client_key = client_key
         self.client_secret = client_secret
@@ -116,11 +116,12 @@ class ETradeAccessManager(object):
         self.revoke_access_token_url = (
             r"https://api.etrade.com/oauth/revoke_access_token"
         )
+        self.verifier = verifier
 
         etrade = OAuth1Service(
             name="etrade",
-            self.client_key,
-            self.client_secret,
+            consumer_key=self.client_key,
+            consumer_secret=self.client_secret,
             request_token_url="https://api.etrade.com/oauth/request_token",
             access_token_url="https://api.etrade.com/oauth/access_token",
             authorize_url="https://us.etrade.com/e/t/etws/authorize?key={}&token={}",
@@ -133,7 +134,7 @@ class ETradeAccessManager(object):
         # Step 2: Exchange the authorized request token for an authenticated OAuth 1 session
         self.session = etrade.get_auth_session(request_token,
                                       request_token_secret,
-                                      params={"oauth_verifier": text_code})
+                                      params={"oauth_verifier": verifier})
 
     def renew_access_token(self):
         """:description: Renews access tokens obtained from :class:`ETradeOAuth`
