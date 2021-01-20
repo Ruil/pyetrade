@@ -85,7 +85,7 @@ class ETradeOAuth(object):
                                       self.request_token_secret,
                                       params={"oauth_verifier": verifier})
         # Get access token
-        self.access_token = {'oauth_token':self.request_token, 'oauth_token_secret':self.request_token_secret, 'oauth_verifier': verifier}
+        self.access_token = {'oauth_token':self.request_token, 'oauth_token_secret':self.request_token_secret, 'oauth_verifier': verifier, 'session':self.session}
         LOGGER.debug(self.access_token)
         return self.access_token
 
@@ -106,7 +106,7 @@ class ETradeAccessManager(object):
     """
 
     def __init__(
-        self, client_key, client_secret, resource_owner_key, resource_owner_secret, verifier
+        self, client_key, client_secret, resource_owner_key, resource_owner_secret, session
     ):
         self.client_key = client_key
         self.client_secret = client_secret
@@ -116,25 +116,8 @@ class ETradeAccessManager(object):
         self.revoke_access_token_url = (
             r"https://api.etrade.com/oauth/revoke_access_token"
         )
-        self.verifier = verifier
+        self.session = session
 
-        etrade = OAuth1Service(
-            name="etrade",
-            consumer_key=self.client_key,
-            consumer_secret=self.client_secret,
-            request_token_url="https://api.etrade.com/oauth/request_token",
-            access_token_url="https://api.etrade.com/oauth/access_token",
-            authorize_url="https://us.etrade.com/e/t/etws/authorize?key={}&token={}",
-            base_url="https://api.etrade.com")
-
-        # Step 1: Get OAuth 1 request token and secret
-        request_token, request_token_secret = etrade.get_request_token(
-            params={"oauth_callback": "oob", "format": "json"})
-
-        # Step 2: Exchange the authorized request token for an authenticated OAuth 1 session
-        self.session = etrade.get_auth_session(request_token,
-                                      request_token_secret,
-                                      params={"oauth_verifier": verifier})
 
     def renew_access_token(self):
         """:description: Renews access tokens obtained from :class:`ETradeOAuth`
