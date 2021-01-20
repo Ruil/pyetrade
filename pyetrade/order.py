@@ -234,7 +234,7 @@ class ETradeOrder:
             headers = {"Content-Type": "application/xml", "consumerKey": consumer_key}
             payload = jxmlease.emit_xml(payload)
             LOGGER.debug("xml payload: %s", payload)
-            req = method(api_url, data=payload, headers=headers, timeout=self.timeout)
+            req = method(api_url, header_auth=True, data=payload, headers=headers, timeout=self.timeout)
 
         LOGGER.debug(req.text)
         req.raise_for_status()
